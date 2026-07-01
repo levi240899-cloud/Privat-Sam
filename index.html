@@ -8,16 +8,33 @@
     <!-- Menghubungkan Manifest PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
+
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; text-align: center; }
+        .container { max-width: 400px; margin: 50px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:hover { background-color: #0056b3; }
+        #statusMessage { margin-top: 15px; font-weight: bold; }
+    </style>
 </head>
 <body>
 
-    <div style="text-align: center; margin-top: 50px; font-family: sans-serif;">
-        <h1>Selamat Datang di Privat Sam</h1>
-        <p>Aplikasi bimbingan belajar Anda sedang disiapkan.</p>
+    <div class="container">
+        <h1>Privat Sam</h1>
+        <p>Formulir Pendaftaran Siswa Baru</p>
+        
+        <form id="pendaftaranForm">
+            <input type="text" id="namaSiswa" placeholder="Nama Lengkap Siswa" required>
+            <input type="number" id="whatsappSiswa" placeholder="Nomor WhatsApp (Contoh: 08123...)" required>
+            <button type="submit" id="btnSubmit">Daftar Sekarang</button>
+        </form>
+        
+        <p id="statusMessage"></p>
     </div>
 
-    <!-- Mendaftarkan Service Worker -->
     <script>
+      // 1. Mendaftarkan Service Worker PWA
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('sw.js')
@@ -25,6 +42,48 @@
             .catch(err => console.log('Gagal daftar Service Worker', err));
         });
       }
+
+      // 2. Integrasi Google Apps Script (GAS)
+      const FormPendaftaran = document.getElementById('pendaftaranForm');
+      const StatusPesan = document.getElementById('statusMessage');
+      const TombolSubmit = document.getElementById('btnSubmit');
+
+      // ⚠️ GANTI DENGAN URL WEB APP YANG ANDA DAPATKAN SETELAH DEPLOY DI GOOGLE APPS SCRIPT
+      const GAS_URL = "https://script.google.com/macros/s/AKfycbwyVAeuv6fnVu-538CHsggb24IoiJGTHt29IJ_nPIPkqDkypdV1QxPwGE-o08cNTttn/exec";
+
+      FormPendaftaran.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        TombolSubmit.disabled = true;
+        StatusPesan.style.color = "orange";
+        StatusPesan.textContent = "Sedang mengirim data...";
+
+        const dataSiswa = {
+            nama: document.getElementById('namaSiswa').value,
+            whatsapp: document.getElementById('whatsappSiswa').value
+        };
+
+        fetch(GAS_URL, {
+            method: 'POST',
+            mode: 'no-cors', // Penting untuk menghindari isu CORS pada Google Apps Script dasar
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dataSiswa)
+        })
+        .then(() => {
+            StatusPesan.style.color = "green";
+            StatusPesan.textContent = "Pendaftaran Berhasil Terkirim!";
+            FormPendaftaran.reset();
+            TombolSubmit.disabled = false;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            StatusPesan.style.color = "red";
+            StatusPesan.textContent = "Terjadi kesalahan, coba lagi.";
+            TombolSubmit.disabled = false;
+        });
+      });
     </script>
 </body>
 </html>
