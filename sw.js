@@ -1,10 +1,9 @@
 const CACHE_NAME = 'privat-sam-v1';
 const assets = [
-  '/',
-  '/index.html',
-  // Masukkan file CSS atau JS lain di sini jika ada, contoh:
-  // '/style.css',
-  // '/app.js'
+  './',
+  './index.html',
+  './manifest.json',
+  './sam.png'
 ];
 
 // Tahap Install: Menyimpan aset ke cache
